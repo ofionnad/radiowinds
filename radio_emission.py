@@ -41,12 +41,12 @@ def generateinterpolatedGrid(layfile, numpoints, coords):
       Z2 = {1:}
       XVar = 1
       YVar = 2
-      ZVar = 3'''.format(ndim, coords))
+      ZVar = 3'''.format(numpoints, coords))
 
-    zone2 = mydata.zone(1)  # name second zone for interpolation
+    zone2 = cur_dataset.zone(1)  # name second zone for interpolation
     tp.data.operate.interpolate_linear(zone2, source_zones=zone1, variables=[3, 10, 22])
     # create second zone and fill with variables
-    tp.data.save_tecplot_ascii(cwd + '/3d_interpolated_grid_{0:}Rstar_{1:}points.dat'.format(coords, ndim),
+    tp.data.save_tecplot_ascii(cwd + '/interpol_grid_{0:}Rstar_{1:}points.dat'.format(coords, numpoints),
                                zones=[zone2],
                                variables=[0, 1, 2, 3, 10, 22],
                                include_text=False,
@@ -58,6 +58,8 @@ def generateinterpolatedGrid(layfile, numpoints, coords):
 def integrationConstant(rstar):
     """
     Function to set the integration constant, based off the stellar radius
+    :param rstar: the radius of the star in units of rsun
+    :return: integration constant, int_c
     """
     int_c = rstar * rsun
     return int_c
@@ -160,7 +162,7 @@ def emptyBack(n, gridsize, ndim):
     # First block of code removes the densities from the sphere in the centre
     ndim = int(ndim)
     c = ndim / 2  # origin of star in grid
-    o = np.array([c, c, c])  # turn into 3d origin
+    o = np.array([c, c, c])  # turn into 3d  vector origin
     rad = ndim / (gridsize * 2)  # radius of star in indices
     x1 = np.linspace(0, ndim - 1, ndim)  # indices array, identical to y1 and z1
     y1 = x1

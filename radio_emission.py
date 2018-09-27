@@ -17,17 +17,17 @@ rsun = 6.957e10  # cm
 
 def generateinterpolatedGrid(layfile, numpoints, coords):
     """
-    Function to output an interpolated tecplot simulation grid for radio emission calculation
+    Function to create and save an interpolated tecplot simulation grid for radio emission calculation
     :param layfile: Tecplot .lay file to be interpolated
     :param numpoints: Number of points in each spatial dimension
     :param coords: Size of the grid in Rstar
-    :return: Interpolated file
+    :return:
     """
     cwd = os.getcwd()
     tp.load_layout(layfile)
-    frame = tp.active_frame()
-    mydata = frame.dataset
-    zone1 = mydata.zone(0)  # zone1 is the original zone
+    frame1 = tp.active_frame()
+    cur_dataset = frame1.dataset
+    zone1 = cur_dataset.zone(0)  # zone1 is what tecplot uses for plotting in the layfile
 
     tp.macro.execute_command('''$!CreateRectangularZone 
       IMax = {0:}
@@ -45,6 +45,7 @@ def generateinterpolatedGrid(layfile, numpoints, coords):
 
     zone2 = mydata.zone(1)  # name second zone for interpolation
     tp.data.operate.interpolate_linear(zone2, source_zones=zone1, variables=[3, 10, 22])
+    # create second zone and fill with variables
     tp.data.save_tecplot_ascii(cwd + '/3d_interpolated_grid_{0:}Rstar_{1:}points.dat'.format(coords, ndim),
                                zones=[zone2],
                                variables=[0, 1, 2, 3, 10, 22],

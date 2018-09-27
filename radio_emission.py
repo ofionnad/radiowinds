@@ -192,16 +192,14 @@ def emptyBack(n, gridsize, ndim):
 
 def absorptionBody(n, T, f):
     """
-        Function that calculates the absorptionBody value for each cell in the interpolated tecplot grid
-        Inputs:
+    Function that calculates the absorption coefficients and blackbody emission value
+    for each cell in the interpolated tecplot grid
 
-         n : density of cell
-         T : temperature of cell
-         f : observing frequency
+    :param n: density of cell
+    :param T: temperature of cell
+    :param f: observing frequency
 
-        Output:
-
-         alpha, B(v,T) : absorption coefficient and the blackbody of each cell
+    :return: alpha_v, B(v,T) : absorption coefficients and the blackbody of each cell
     """
     gaunt = 10.6 + (1.90 * np.log10(T)) - (1.26 * np.log10(f))
     kb = 1.38e-16
@@ -216,8 +214,12 @@ def absorptionBody(n, T, f):
 
 def get_gaunt(T, f):
     """
-    Function simpy returns grid of values of gaunt factors from temperatures and frequencies
+    Function that simply returns grid of values of gaunt factors from temperatures and frequencies
     Note: Assumes that Z (ionic charge) is +1.
+
+    :param T: grid of temperatures in Kelvin
+    :param f: observational frequency
+    :return: grid of gaunt factors the same shape as T
     """
 
     gaunt = 10.6 + (1.90 * np.log10(T)) - (1.26 * np.log10(f))
@@ -226,11 +228,13 @@ def get_gaunt(T, f):
 
 def opticalDepth(X, ab, int_c):
     """
-        Name : opticalDepth()
+    Calculates the optical depth of material given the integration grid and the absorption coefficients.
 
-        Function : Calculates the optical depth of material given the integration grid (ds_i) and the absorption coefficients (ab).
+    :param X: The regular spacing of the interpolated grid (integration distances , ds)
+    :param ab: grid of absorption coefficients calculated from absorptionBody()
+    :param int_c: integration constant calculated from integrationConstant()
 
-        Returns : cumulative optical depth (tau)
+    :return: cumulative optical depth (tau)
     """
     tau = (intg.cumtrapz(ab, x=X, initial=0)) * int_c
 
@@ -247,18 +251,6 @@ def intensity(ab, bb, tau, X, int_c):
     """
     I = intg.simps((bb * np.exp(-tau)) * ab, x=X) * int_c
     return I
-
-
-def intensityOldMethod(bb, tau):
-    """
-        Name : intensity()
-
-        Function : Calculates the intensity of emission given the blackbody emission from each grid cell and the optical depth at each cell
-    """
-
-    Iv = bb * (1.0 - np.exp(-tau))
-    # return np.sum(Iv, axis=2)
-    return Iv[:, :, -1]
 
 
 def flux_density(I, X, d, int_c):
@@ -389,15 +381,17 @@ def radioEmission(X, n_i, T_i, f, d, ndim, gridsize, int_c):
     return I, Sv, Rv
 
 
-def log_slope(x1, x2, y1, y2):
-    x3, x4 = np.log10(x1), np.log10(x2)
-    y3, y4 = np.log10(y1), np.log10(y2)
-    return (y3 - y4) / (x3 - x4)
-
-
-def single_plot(I, tau, f, ndim, gridsize, loop=False):
+def single_plot(I, tau, f, ndim, gridsize):
     """
-    Plot two images beside each other
+    Plot a single intensity image with the contours from the relevant optical depth image
+    :param I: Intensities
+    :param tau: 2d array of optical depths
+    :param f: observing frequency
+    :param ndim: number of points in the grid in each spatial dimension
+    :param gridsize: the size of the grid in rstar
+
+    :return: Rv_PF - the radius of the optically thick regionax1 - the axes of the plot that is shown
+
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
     p = ax1.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)

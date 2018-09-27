@@ -138,6 +138,8 @@ def rotateGrid(n, T, degrees, axis='z'):
     if axis == 'y':
         n_rot = interpol.rotate(n, degrees, axes=(0, 1), reshape=False)
         T_rot = interpol.rotate(T, degrees, axes=(0, 1), reshape=False)
+    else:
+        raise ValueError("axis is None. Need to assign value to axis")
 
     # return rotated arrays
     return n_rot, T_rot

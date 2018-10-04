@@ -70,6 +70,7 @@ def prettyprint(x, baseunit):
     shift = decimal.Decimal('1E24')
     d = (decimal.Decimal(str(x)) * shift).normalize()
     m, e = d.to_eng_string().split('E')
+    m = "{0:.2f}".format(float(m))
     return m + " " + prefix[int(e) // 3] + baseunit
 
 
@@ -299,7 +300,7 @@ def double_plot(I, tau, f_i, ndim, gridsize):
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
     p = ax1.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-20, vmax=1e-12), cmap=cm.Greens)
-    fig.suptitle(r'$\nu_{{\rm ob}}$ =  {:.1e} Hz'.format(f_i), bbox=dict(fc="w", ec="C3", boxstyle="round"))
+    fig.suptitle(r'$\nu_{{\rm ob}}$ =  {0:.2f} Hz'.format(f_i), bbox=dict(fc="w", ec="C3", boxstyle="round"))
     circ1 = plt.Circle((ndim / 2, ndim / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax1.add_artist(circ1)
     div1 = make_axes_locatable(ax1)
@@ -362,7 +363,7 @@ def spectrumCalculate(folder, freqs, X, n_i, T_i, d, ndim, gridsize, int_c, plot
             pass
         else:
             Rv, ax = single_plot(I, tau, j, ndim, gridsize)
-            plt.savefig('{0:}/img_{1:}'.format(folder, i))
+            plt.savefig('{0:}/img_{1:}'.format(folder, i), dpi=700)
             plt.close('all')
     return Svs, Rvs
 

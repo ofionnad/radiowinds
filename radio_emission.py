@@ -363,7 +363,7 @@ def spectrumCalculate(folder, freqs, X, n_i, T_i, d, ndim, gridsize, int_c, plot
             pass
         else:
             Rv, ax = single_plot(I, tau, j, ndim, gridsize)
-            plt.savefig('{0:}/img_{1:}'.format(folder, i), dpi=700)
+            plt.savefig('{0:}/img_{1:}'.format(folder, i), dpi=500)
             plt.close('all')
     return Svs, Rvs
 

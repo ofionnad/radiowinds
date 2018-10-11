@@ -97,7 +97,7 @@ def testData(ndim, gridsize, n0, T0, gamma):
         ndim / 2)] = 0  # this is getting rid of the centre inf, doesn't matter as it is at centre and is removed
     # anyway!
     T = T0 * (n / n0) ** gamma
-    return n, T
+    return Z, n, T
 
 
 def readData(filename, skiprows, ndim):
@@ -208,8 +208,8 @@ def absorptionBody(n, T, f):
     c = 2.998e10
     absorption_c = 3.692e8 * (1.0 - np.exp(-(h * f) / (kb * T))) * ((n / 4.) ** 2) * (T ** -0.5) * (f ** -3.0) * gaunt
     bb = ((2.0 * h * (f ** 3.0)) / (c ** 2.0)) * (1.0 / (np.exp((h * f) / (kb * T)) - 1.0))
-    absorption_c[np.isnan(absorption_c)] = 0.0
-    absorption_c[np.isinf(absorption_c)] = 0.0
+    absorption_c[np.isnan(absorption_c)] = 1e-40
+    absorption_c[np.isinf(absorption_c)] = 1e-40
     return absorption_c, bb
 
 
@@ -336,7 +336,7 @@ def double_plot(I, tau, f_i, ndim, gridsize):
     ax1.grid(which='major', linestyle=':', alpha=0.8)
     ax2.grid(which='major', linestyle=':', alpha=0.8)
     plt.show()
-    plt.close()
+    #plt.close()
     return Rv_PF
 
 
@@ -439,7 +439,7 @@ def single_plot(I, tau, f, ndim, gridsize):
     fig2, axs = plt.subplots(1, 1, figsize=(7.3, 6))
     p2 = axs.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)
     frequency_text = int(f)
-    plt.text(15, ndim-15, r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
+    plt.text(int(ndim/10), int(ndim-(ndim/10)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
              bbox=dict(fc="w", ec="C3", boxstyle="round", alpha=0.8), fontsize=12)
     circ3 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     axs.add_artist(circ3)

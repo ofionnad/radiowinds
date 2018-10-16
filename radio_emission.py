@@ -186,7 +186,8 @@ def emptyBack(n, gridsize, ndim):
     for i in range(int(
             ndim / 2)):  # iterate over the xz planes moving back from centre of the grid (ndim/2) to the back (ndim)
         for j in p_circ:
-            n[int(j[0]), int(j[1]), int(i + c)] = 1e-40
+            n[int(j[0]), int(i+c), int(j[1])] = 1e-40
+            #n[int(j[0]), int(j[1]), int(i + c)] = 1e-40
 
     return n
 
@@ -235,9 +236,11 @@ def opticalDepth(X, ab, int_c):
     :param ab: grid of absorption coefficients calculated from absorptionBody()
     :param int_c: integration constant calculated from integrationConstant()
 
-    :return: cumulative optical depth (tau)
+    :return: array of cumulative optical depth (tau)
     """
-    tau = (intg.cumtrapz(ab, x=X, initial=0)) * int_c
+    tau = (intg.cumtrapz(ab, x=X, initial=0, axis=1)) * int_c
+    #note that axis=1 is here to ensure integration occurs along y axis.
+    #Python denotes the arrays as [z,y,x] in Tecplot axes terms.(x and z axes notation are swapped)
 
     return tau
 

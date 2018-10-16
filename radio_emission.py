@@ -310,7 +310,7 @@ def double_plot(I, tau, f_i, ndim, gridsize):
     cax1 = div1.append_axes("right", size="8%", pad=0.1)
     cbar1 = plt.colorbar(p, cax=cax1)
     cbar1.set_label(r'I$_{\nu}$ (erg/s/cm$^2$/sr/Hz)', fontsize=16)
-    p2 = ax2.imshow(tau[:, :, -1], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=1), cmap=cm.Oranges)
+    p2 = ax2.imshow(tau[:, -1, :], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=1), cmap=cm.Oranges)
     circ2 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax2.add_artist(circ2)
     cset1 = ax2.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')

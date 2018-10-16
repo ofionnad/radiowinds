@@ -238,7 +238,7 @@ def opticalDepth(X, ab, int_c):
 
     :return: array of cumulative optical depth (tau)
     """
-    tau = (intg.cumtrapz(ab, x=X, initial=0, axis=1)) * int_c
+    tau = (intg.cumtrapz(ab, x=X[0,0,:], initial=0, axis=1)) * int_c
     #note that axis=1 is here to ensure integration occurs along y axis.
     #Python denotes the arrays as [z,y,x] in Tecplot axes terms.(x and z axes notation are swapped)
 
@@ -313,7 +313,7 @@ def double_plot(I, tau, f_i, ndim, gridsize):
     p2 = ax2.imshow(tau[:, :, -1], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=1), cmap=cm.Oranges)
     circ2 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax2.add_artist(circ2)
-    cset1 = ax2.contour(tau[:, :, -1], 0.399, colors='k', origin='lower', linestyles='dashed')
+    cset1 = ax2.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
     Rv_PF = (get_Rv(cset1, ndim, gridsize))
     div2 = make_axes_locatable(ax2)
     cax2 = div2.append_axes("right", size="8%", pad=0.1)
@@ -406,12 +406,12 @@ def single_plot(I, tau, f, ndim, gridsize):
     cax1 = div1.append_axes("right", size="8%", pad=0.1)
     cbar1 = plt.colorbar(p, cax=cax1)
     cbar1.set_label(r'I$_{\nu}$ (erg/s/cm$^2$/sr/Hz)', fontsize=16)
-    p2 = ax2.imshow(tau[:, :, -1], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=1),
+    p2 = ax2.imshow(tau[:, -1, :], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=1),
                     cmap=cm.Oranges)
     circ2 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax2.add_artist(circ2)
-    cset1 = ax2.contour(tau[:, :, -1], 0.399, colors='k', origin='lower', linestyles='dashed')
-    cset2 = ax2.contour(tau[:, :, -1], 0.244, colors='k', origin='lower', linestyles='dotted')
+    cset1 = ax2.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
+    cset2 = ax2.contour(tau[:, -1, :], 0.244, colors='k', origin='lower', linestyles='dotted')
     Rv_PF = (get_Rv(cset1, ndim, gridsize))
     div2 = make_axes_locatable(ax2)
     cax2 = div2.append_axes("right", size="8%", pad=0.1)

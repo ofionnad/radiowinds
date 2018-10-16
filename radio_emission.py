@@ -110,9 +110,10 @@ def readData(filename, skiprows, ndim):
     """
     df = pd.read_csv(filename, header=None, skiprows=skiprows, sep='\s+')
     X = df[0].values.reshape((ndim, ndim, ndim))
+    ds = X[0, 0, :]
     n_grid = (df[3].values.reshape((ndim, ndim, ndim))) / (1.673e-24 * 0.5)
     T_grid = df[5].values.reshape((ndim, ndim, ndim))
-    return X, n_grid, T_grid
+    return ds, n_grid, T_grid
 
 
 def rotateGrid(n, T, degrees, axis='z'):
@@ -228,24 +229,24 @@ def get_gaunt(T, f):
     return gaunt
 
 
-def opticalDepth(X, ab, int_c):
+def opticalDepth(ds, ab, int_c):
     """
     Calculates the optical depth of material given the integration grid and the absorption coefficients.
 
-    :param X: The regular spacing of the interpolated grid (integration distances , ds)
+    :param ds: The regular spacing of the interpolated grid (integration distances , ds)
     :param ab: grid of absorption coefficients calculated from absorptionBody()
     :param int_c: integration constant calculated from integrationConstant()
 
     :return: array of cumulative optical depth (tau)
     """
-    tau = (intg.cumtrapz(ab, x=X[0,0,:], initial=0, axis=1)) * int_c
+    tau = (intg.cumtrapz(ab, x=ds, initial=0, axis=1)) * int_c
     #note that axis=1 is here to ensure integration occurs along y axis.
     #Python denotes the arrays as [z,y,x] in Tecplot axes terms.(x and z axes notation are swapped)
 
     return tau
 
 
-def intensity(ab, bb, tau, X, int_c):
+def intensity(ab, bb, tau, ds, int_c):
     """
         Name : intensity()
 
@@ -253,11 +254,11 @@ def intensity(ab, bb, tau, X, int_c):
                    Note : Not sure whether to take the last 2d grid of cells (i.e. - Iv[:,:,-1])
                           or sum up each column given the bb and tau (i.e. - np.sum(Iv, axis=2).
     """
-    I = intg.simps((bb * np.exp(-tau)) * ab, x=X) * int_c
+    I = intg.simps((bb * np.exp(-tau)) * ab, x=ds, axis=1) * int_c
     return I
 
 
-def flux_density(I, X, d, int_c):
+def flux_density(I, ds, d, int_c):
     """
         Name : flux_density()
 
@@ -265,7 +266,7 @@ def flux_density(I, X, d, int_c):
     """
     d *= 3.085678e18  # change d from pc to cm
     # flux here given in Jy
-    Sv = 1e23 * (int_c ** 2.0) * intg.simps(intg.simps(I, x=X[0, 0, :]), x=X[0, 0, :]) / d ** 2.0
+    Sv = 1e23 * (int_c ** 2.0) * (intg.simps(intg.simps(I, x=ds), x=ds)) / d ** 2.0
     return Sv
 
 
@@ -284,17 +285,13 @@ def get_Rv(contour, ndim, gridsize):
 
     """
     path = contour.collections[0].get_paths()
-    if not path:
-        print('no contours here')
-        return [1]
-    else:
-        path = path[0]
-        verts = path.vertices
-        x, y = verts[:, 0], verts[:, 1]
-        x1, y1 = x - ndim / 2, y - ndim / 2
-        r = np.sqrt(x1 ** 2 + y1 ** 2)
-        Rv = gridsize * (max(r) / (ndim / 2.0))
-        return Rv
+    path = path[0]
+    verts = path.vertices
+    x, y = verts[:, 0], verts[:, 1]
+    x1, y1 = x - ndim / 2, y - ndim / 2
+    r = np.sqrt(x1 ** 2 + y1 ** 2)
+    Rv = gridsize * (max(r) / (ndim / 2.0))
+    return Rv
 
 
 def double_plot(I, tau, f_i, ndim, gridsize):
@@ -310,7 +307,7 @@ def double_plot(I, tau, f_i, ndim, gridsize):
     cax1 = div1.append_axes("right", size="8%", pad=0.1)
     cbar1 = plt.colorbar(p, cax=cax1)
     cbar1.set_label(r'I$_{\nu}$ (erg/s/cm$^2$/sr/Hz)', fontsize=16)
-    p2 = ax2.imshow(tau[:, -1, :], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=1), cmap=cm.Oranges)
+    p2 = ax2.imshow(tau[:, -1, :], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=0.399), cmap=cm.Oranges)
     circ2 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax2.add_artist(circ2)
     cset1 = ax2.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
@@ -343,7 +340,7 @@ def double_plot(I, tau, f_i, ndim, gridsize):
     return Rv_PF
 
 
-def spectrumCalculate(folder, freqs, X, n_i, T_i, d, ndim, gridsize, int_c, plotting=False):
+def spectrumCalculate(folder, freqs, ds, n_i, T_i, d, ndim, gridsize, int_c, plotting=False):
     """
     Inputs : folder name, range of frequencies, position coordinate, density, temperature
 
@@ -355,10 +352,10 @@ def spectrumCalculate(folder, freqs, X, n_i, T_i, d, ndim, gridsize, int_c, plot
     taus = []
     for i, j in enumerate(freqs):
         ab, bb = absorptionBody(n_i, T_i, j)
-        tau = opticalDepth(X, ab, int_c)
+        tau = opticalDepth(ds, ab, int_c)
         taus.append(np.mean(tau))
-        I = intensity(ab, bb, tau, X, int_c)
-        Sv = flux_density(I, X, d, int_c)
+        I = intensity(ab, bb, tau, ds, int_c)
+        Sv = flux_density(I, ds, d, int_c)
         Svs.append(Sv)
         Rv = double_plot(I, tau, j, ndim, gridsize)
         Rvs.append(Rv)
@@ -371,16 +368,16 @@ def spectrumCalculate(folder, freqs, X, n_i, T_i, d, ndim, gridsize, int_c, plot
     return Svs, Rvs
 
 
-def radioEmission(X, n_i, T_i, f, d, ndim, gridsize, int_c):
+def radioEmission(ds, n_i, T_i, f, d, ndim, gridsize, int_c):
     """
     Inputs : position coordinates, density (/cc), Temperature (K), distance to star (pc), number of points in each axes of the grid, grid size in rstar.
 
     Output : Flux density (Sv), Radius of emission (Rv), plots intensity and optical depth.
     """
     ab, bb = absorptionBody(n_i, T_i, f)
-    tau = opticalDepth(X, ab, int_c)
-    I = intensity(ab, bb, tau, X, int_c)
-    Sv = flux_density(I, X, d, int_c)
+    tau = opticalDepth(ds, ab, int_c)
+    I = intensity(ab, bb, tau, ds, int_c)
+    Sv = flux_density(I, ds, d, int_c)
     Rv, ax = single_plot(I, tau, f, ndim, gridsize)
     return I, Sv, Rv
 
@@ -397,50 +394,10 @@ def single_plot(I, tau, f, ndim, gridsize):
     :return: Rv_PF - the radius of the optically thick regionax1 - the axes of the plot that is shown
 
     """
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
-    p = ax1.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)
-    fig.suptitle(r'$\nu_{{\rm ob}}$ =  {} GHz'.format(str(f)), bbox=dict(fc="w", ec="C3", boxstyle="round"))
-    circ1 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
-    ax1.add_artist(circ1)
-    div1 = make_axes_locatable(ax1)
-    cax1 = div1.append_axes("right", size="8%", pad=0.1)
-    cbar1 = plt.colorbar(p, cax=cax1)
-    cbar1.set_label(r'I$_{\nu}$ (erg/s/cm$^2$/sr/Hz)', fontsize=16)
-    p2 = ax2.imshow(tau[:, -1, :], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=1),
-                    cmap=cm.Oranges)
-    circ2 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
-    ax2.add_artist(circ2)
-    cset1 = ax2.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
-    cset2 = ax2.contour(tau[:, -1, :], 0.244, colors='k', origin='lower', linestyles='dotted')
-    Rv_PF = (get_Rv(cset1, ndim, gridsize))
-    div2 = make_axes_locatable(ax2)
-    cax2 = div2.append_axes("right", size="8%", pad=0.1)
-    cbar2 = plt.colorbar(p2, cax=cax2)
-    cbar2.set_label(r'$\tau_{\nu}$', fontsize=16)
-    plt.tight_layout()
-    ax1.set_xticks(np.linspace(0, 200, 5))
-    ax2.set_xticks(np.linspace(0, 200, 5))
-    ax1.set_yticks(np.linspace(0, 200, 5))
-    ax2.set_yticks(np.linspace(0, 200, 5))
-    ax1.set_xticklabels(['-10', '-5', '0', '5', '10'], fontsize=16)
-    ax1.set_yticklabels(['-10', '-5', '0', '5', '10'], fontsize=16)
-    ax2.set_xticklabels(['-10', '-5', '0', '5', '10'], fontsize=16)
-    ax2.set_yticklabels(['-10', '-5', '0', '5', '10'], fontsize=16)
-    ax1.set_xlim([25, 175])
-    ax2.set_xlim([25, 175])
-    ax1.set_ylim([25, 175])
-    ax2.set_ylim([25, 175])
-    ax1.set_ylabel(r'R$_{\star}$', fontsize=20)
-    ax1.set_xlabel(r'R$_{\star}$', fontsize=20)
-    ax2.set_ylabel(r'R$_{\star}$', fontsize=20)
-    ax2.set_xlabel(r'R$_{\star}$', fontsize=20)
-    ax1.grid(which='major', linestyle=':', alpha=0.8)
-    ax2.grid(which='major', linestyle=':', alpha=0.8)
-    plt.show()
-    plt.close()
 
-    fig2, axs = plt.subplots(1, 1, figsize=(7.3, 6))
+    fig, axs = plt.subplots(1, 1, figsize=(7.3, 6))
     p2 = axs.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)
+    cset1 = plt.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
     frequency_text = int(f)
     plt.text(int(ndim/10), int(ndim-(ndim/10)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
              bbox=dict(fc="w", ec="C3", boxstyle="round", alpha=0.8), fontsize=12)
@@ -451,14 +408,12 @@ def single_plot(I, tau, f, ndim, gridsize):
     cbars = plt.colorbar(p2, cax=caxs)
     cbars.set_label(r'I$_{\nu}$ (erg s$\rm ^{-1} cm^{-2} sr^{-1} Hz^{-1}$)', fontsize=20)
     cbars.ax.tick_params(labelsize=15)
-    if cset1.collections[0] == None:
-        pass
+    if len(cset1.collections[0].get_paths()) < 2 and len(cset1.collections[0].get_paths()[0].vertices) == 1:
+        print("\nNo contours! - Optically Thin Wind")
+        Rv_PF = None
     else:
-        for path in cset1.collections[0].get_paths():
-            verts = path.vertices
-            cx = verts[:, 0]
-            cy = verts[:, 1]
-            axs.plot(cx, cy, linestyle='--', color='k')
+        Rv_PF = get_Rv(cset1, ndim, gridsize)
+
     axs.set_xticks(np.linspace(0, ndim, 5))
     axs.set_yticks(np.linspace(0, ndim, 5))
     axs.set_xticklabels(['-'+str(int(gridsize)), '-'+str(int(gridsize/2)), '0', str(int(gridsize/2)), str(int(gridsize))], fontsize=16)
@@ -470,4 +425,4 @@ def single_plot(I, tau, f, ndim, gridsize):
     axs.grid(which='major', linestyle=':', alpha=0.8, color='white')
     plt.tight_layout()
 
-    return Rv_PF, ax1
+    return Rv_PF, axs

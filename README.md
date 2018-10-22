@@ -9,7 +9,7 @@ This code is used in a paper currently submitted to Monthly Notices of the Royal
 Plans to include on pip to make installation easier, for now, simple cloning of this repository should work.
 
 ## Author
-Written by D\u{u}alta \'{O} Fionnag\'{a}in in Trinity College Dublin, 2018
+Written by D\`{u}alta '{O} Fionnag\'{a}in in Trinity College Dublin, 2018
 MIT License
 
 Email: ofionnad@tcd.ie

@@ -1,7 +1,0 @@
-numpy
-pandas
-scipy
-matplotlib
-decimal
-pytecplot
-os

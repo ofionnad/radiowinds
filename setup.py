@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="radiowinds",
-    version="0.0.1",
+    version="0.0.2",
     author="Dualta O Fionnagain",
     author_email="ofionnad@tcd.ie",
     description="A package to calculate the thermal free-free emission from stellar winds",

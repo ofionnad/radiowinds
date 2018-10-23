@@ -39,6 +39,7 @@ The above test will also output an image that should look like the following:
 ![Alt text](radiowinds/test_ordered.png?raw=true "Thermal Bremstrahlung from a stellar wind")
 
 
+
 ## Quick Example Code
 To use this code with your own data follow the steps below.
 You require that the data is in the format of an evenly interpolated 3D grid.

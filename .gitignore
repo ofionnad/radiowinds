@@ -21,3 +21,5 @@ setup.py
 *.egg-info/
 .installed.cfg
 *.egg
+
+READMEpy.md

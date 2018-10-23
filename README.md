@@ -38,8 +38,6 @@ The above test will also output an image that should look like the following:
 
 ![Alt text](radiowinds/test_ordered.png?raw=true "Thermal Bremstrahlung from a stellar wind")
 
-
-
 ## Quick Example Code
 To use this code with your own data follow the steps below.
 You require that the data is in the format of an evenly interpolated 3D grid.
@@ -76,7 +74,7 @@ I, sv, rv = re.radioEmission(ds, n, T, freq, dist, ndim, gridsize, int_c)
 ```
 This should output an image of the intensity (and assign this data to `I`) from the wind and assign the radio flux to `sv` and the radio photopshere size to `rv`.
 
-## Compute a Spectrum
+## Compute a Radio Spectrum
 This repository also provides a way to automatically cycle through a range of frequencies to find the spectrum of a stellar wind.
 
 This can be done by using the `spectrumCalculate()` function.
@@ -113,7 +111,11 @@ This will create an mp4 animation of the radio emission at different frequencies
 Warning: 
 
 If very low frequencies are used in the above calculations you run into some numerical problems.
-Namely this is that the flux is overestimated.
+Namely this is that the flux is overestimated. 
+
+This is due to the fact that the optically thick region of the wind gets larger at lower frequencies,
+and eventually will reach the boundary of the 3d grid. When this happens the code calculates the emission from denser
+regions than would be visible had the 3d box been larger. 
 
 
 ### Author

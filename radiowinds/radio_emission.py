@@ -19,6 +19,7 @@ def generateinterpolatedGrid(layfile, numpoints, coords):
     """
     Function to create and save an interpolated tecplot simulation grid for radio emission calculation
     This will only work with Tecplot 360 installed on your system.
+
     :param layfile: Tecplot .lay file to be interpolated
     :param numpoints: Number of points in each spatial dimension
     :param coords: Size of the grid in Rstar
@@ -58,7 +59,8 @@ def generateinterpolatedGrid(layfile, numpoints, coords):
 
 def integrationConstant(rstar):
     """
-    Function to set the integration constant, based off the stellar radius
+    Function to set the integration constant, based off the stellar radius.
+
     :param rstar: the radius of the star in units of rsun
     :return: integration constant, int_c
     """
@@ -67,6 +69,13 @@ def integrationConstant(rstar):
 
 
 def prettyprint(x, baseunit):
+    """
+    Just a function to round the printed units to nice amounts
+
+    :param x: Input value
+    :param baseunit: Units used
+    :return: rounded value with correct unit prefix
+    """
     prefix = 'yzafpnµm kMGTPEZY'
     shift = decimal.Decimal('1E24')
     d = (decimal.Decimal(str(x)) * shift).normalize()
@@ -75,15 +84,19 @@ def prettyprint(x, baseunit):
     return m + " " + prefix[int(e) // 3] + baseunit
 
 
+
 def testData(ndim, gridsize, n0, T0, gamma, ordered=True):
     """
-         Function to make a test data set that follows a n ~ r^-2 density distribution
-         Inputs:
-             ndim	:	number of data points in each dimension
-             gridsize	: the size of the grid in rstar (note that this would be 10 for a grid of size -10 to +10 rstar).
-             n0 : The base density of your plasma
-             T0 : The temperature at the base of the grid
-             gamma : temperature fall off -- follows polytropic form
+    Function to produce a grid of sample values of density and temperature.
+    Either ordered which follows a n ~ R^{-3} profile, or not ordered which has a more randomised distribution.
+
+    :param ndim: Number of gridpoints in each dimension
+    :param gridsize: The size of the grid radius in rstar
+    :param n0: base density of the stellar wind
+    :param T0: base temperature of the stellar wind
+    :param gamma: polytopic index of the wind to derive temperature from density
+    :param ordered: either cause density to fall off with R^{-3} or be more randomised with a R^{-3} component
+    :return: ds, n, T. ds is the spacing in the grid used for integration. n is the grid density (shape ndim^3). T is the grid temperature (shape ndim^3).
     """
     if ordered==True:
         o = np.array([int(ndim / 2), int(ndim / 2), int(ndim / 2)])
@@ -95,6 +108,7 @@ def testData(ndim, gridsize, n0, T0, gamma, ordered=True):
         d = np.vstack((X.ravel(), Y.ravel(), Z.ravel())).T
         sph_dist = sp.distance.cdist(d, o.reshape(1, -1)).ravel()
         sph_dist = sph_dist.reshape(ndim, ndim, ndim) /(ndim/2/gridsize)
+        sph_dist[int(ndim/2), int(ndim/2), int(ndim/2)] = 1e-40
         n = n0 * (sph_dist ** -3)
         n[int(ndim / 2), int(ndim / 2), int(ndim / 2)] = 0
         # this is getting rid of the centre inf, doesn't matter as it is at centre and is removed anyway!
@@ -111,24 +125,27 @@ def testData(ndim, gridsize, n0, T0, gamma, ordered=True):
         sph_dist = sp.distance.cdist(d, o.reshape(1, -1)).ravel()
         sph_dist = sph_dist.reshape(ndim, ndim, ndim) / (ndim / 2 / gridsize)
         sph_dist[int(ndim/2), int(ndim/2), int(ndim/2)] = 1e-20
+
         #make random array of data
         rand_n = n0*np.random.rand(ndim,ndim,ndim)
         n = rand_n * (sph_dist ** -3) #give it a resemblence of falling off with distance
-        n[n>1e8] = n[n>1e8]+2e8  #cause some change to be non isotropic!
+        n[n>1e8] = n[n>1e8]+2e8  #cause some change to increase centre contrast in density!
         n[int(ndim / 2), int(ndim / 2), int(ndim / 2)] = 0
         # this is getting rid of the centre inf, doesn't matter as it is at centre and is removed anyway!
 
         T = T0 * (n / n0) ** gamma
         return ds, n, T
 
-
 def readData(filename, skiprows, ndim):
     """
-    This function expects an interpolated grid from tecplot.
-    Inputs:
-        filename - file to be read
-        skiprows - number of lines in filename comprising the header (this will be thrown away)
-        ndim - the size of the grid points (how many points you interpolated onto per axis in tecplot)
+    This function expects an interpolated grid of data. Originally interpolated using the tecplot software.
+    Not tested yet but I am sure VisIT interpolated produced a similar output and can also be used.
+    Maybe include grid interpolation function in future.
+
+    :param filename: Name of the data file to read from
+    :param skiprows: Number of rows to skip (according to the pandas read_csv() function.
+    :param ndim: Number of gridpoints in each dimension
+    :return: ds, n, T. Grid spacing, grid density and grid temperature.
     """
     df = pd.read_csv(filename, header=None, skiprows=skiprows, sep='\s+')
     X = df[0].values.reshape((ndim, ndim, ndim))
@@ -153,6 +170,7 @@ def rotateGrid(n, T, degrees, axis='z'):
 
          n, T, f all rotated
     """
+    print(axis)
     # The z axis rotates the grid around the vertical axis (used for rotation modulation of a star for example)
     if axis == 'z':
         n_rot = interpol.rotate(n, degrees, axes=(1, 2), reshape=False)
@@ -174,14 +192,12 @@ def rotateGrid(n, T, degrees, axis='z'):
 
 def emptyBack(n, gridsize, ndim):
     """
-        Function to set the density within and behind the star to zero (or 1e-40 in this case to avoid dividing by 0)
-        Inputs:
-            n		: the grid of densities to be edited
-            gridsize: the size of the grid in rstar
-            ndim	: the number of indices in the grid in each dimension
+    Function that sets the density within and behind the star to zero (or very close to zero).
 
-        Output:
-            n : The original grid of densities with the necessary densities removed
+    :param n: grid densities
+    :param gridsize: size of grid radius in rstar
+    :param ndim: number of gridpoints in each dimension
+    :return: n, the original grid of densities with the necessary densities removed
     """
     # First block of code removes the densities from the sphere in the centre
     ndim = int(ndim)

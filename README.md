@@ -14,6 +14,18 @@ The code is available using pip:
 
 Or alternatively can be cloned directly from this repository.
 
+### Dependencies
+The calculations in this package depend on a number of different python packages, namely:
+* **[numpy](http://www.numpy.org/)** 
+* **[matplotlib](https://matplotlib.org/)** 
+* **[pandas](https://pandas.pydata.org/)** 
+* **[scipy](https://www.scipy.org/)** 
+* [pytecplot](https://www.tecplot.com/docs/pytecplot/) 
+* [moviepy](https://zulko.github.io/moviepy/install.html)
+* [natsort](https://pypi.org/project/natsort/)
+
+Required packages are shown in bold.
+
 ## Testing
 The quickest way to test that the code is working is to use the test script included in the package.
 
@@ -96,7 +108,7 @@ plt.plot(freqs, svs)
 ```
 
 ### Creating animations
-Using the images plotted from the spectrum function (provided `plotting == True`), one can use the moviepy module to make a short animation of the output.
+Using the images plotted from the spectrum function (provided `plotting == True`), one can use the [moviepy module](https://zulko.github.io/moviepy/) to make a short animation of the output.
 
 ```python
 import radiowinds.make_animation as ma 
@@ -122,6 +134,6 @@ regions than would be visible had the 3d box been larger.
 Written by Dualta O Fionnagain in Trinity College Dublin, 2018
 MIT License
 
-Email: ofionnad@tcd.ie
+Email : ofionnad@tcd.ie
 
-Github: https://github.com/Dualta93
+[My Github](https://github.com/Dualta93)

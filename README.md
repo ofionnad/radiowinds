@@ -36,7 +36,7 @@ The `data` variable should now contain an array of 3 variables: 2d array of inte
 
 The above test will also output an image that should look like the following:
 
-![Alt text](/home/dualta/code/radio/stellar_wind_thermal_bremsstrahlung/radiowinds/test_ordered.png?raw=true "Thermal Bremstrahlung from a stellar wind")
+![Alt text](radiowinds/test_ordered.png?raw=true "Thermal Bremstrahlung from a stellar wind")
 
 
 ## Quick Example Code

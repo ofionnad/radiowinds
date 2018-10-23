@@ -48,7 +48,7 @@ The `data` variable should now contain an array of 3 variables: 2d array of inte
 
 The above test will also output an image that should look like the following:
 
-![Alt text](radiowinds/test_ordered.png?raw=true "Thermal Bremstrahlung from a stellar wind")
+![Alt text](https://github.com/Dualta93/radiowinds/raw/master/radiowinds/test_ordered.png "Thermal Bremstrahlung from a stellar wind")
 
 ## Quick Example Code
 To use this code with your own data follow the steps below.

@@ -157,20 +157,16 @@ def readData(filename, skiprows, ndim):
 
 def rotateGrid(n, T, degrees, axis='z'):
     """
-        Function that rotates the grid so that the emission can be calculated from any angle.
-        Inputs:
+    Function that rotates the grid so that the emission can be calculated from any angle.
 
-         n : grid densities
-         T : grid temperatures
-         degrees : number of degrees for grid to rotate. Can be negative or positive, will rotate opposite directions
-         axis : This keyword sets the axis to rotate around. Default is z. A z axis rotation will rotate the grid "left/right".
-                A x-axis rotation would rotate the grid "forwards/backwards" and should be used to set inclination of star.
-
-        Outputs:
-
-         n, T, f all rotated
+    :param n: grid densities
+    :param T: grid temperatures
+    :param degrees: number of degrees for grid to rotate. Can be negative or positive, will rotate opposite directions
+    :param axis: This keyword sets the axis to rotate around. Default is z. A z axis rotation will rotate the grid "left/right". An x-axis rotation would rotate the grid "forwards/backwards" and should be used to set inclination of star.
+    :return: n and T, rotated!
     """
-    print(axis)
+
+    print(axis, type(axis))
     # The z axis rotates the grid around the vertical axis (used for rotation modulation of a star for example)
     if axis == 'z':
         n_rot = interpol.rotate(n, degrees, axes=(1, 2), reshape=False)
@@ -184,6 +180,7 @@ def rotateGrid(n, T, degrees, axis='z'):
         n_rot = interpol.rotate(n, degrees, axes=(0, 1), reshape=False)
         T_rot = interpol.rotate(T, degrees, axes=(0, 1), reshape=False)
     else:
+        print(type(axis))
         raise ValueError("axis is None. Need to assign value to axis")
 
     # return rotated arrays

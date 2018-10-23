@@ -2,7 +2,7 @@
 This script is a quick test script that outputs a sample intensity plot and radio flux.
 The parameters at the beginning are reasonable values to be chosen for an example grid of stellar wind.
 """
-import radio_emission as re
+import radiowinds.radio_emission as re
 import matplotlib.pyplot as plt
 
 # set up some variables

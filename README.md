@@ -6,11 +6,22 @@ This code is used in a paper currently submitted to Monthly Notices of the Royal
 
 
 ## Installation
-Plans to include on pip to make installation easier, for now, simple cloning of this repository should work.
+The code is available using pip:
+`pip install radiowinds`
+
+Or alternatively can be cloned directly from this repository.
+
+## Testing
+The quickest way to test that the code is working is to use the test script included in the package.
+
+
+## Quick Example Code
+
 
 ## Author
 Written by Dualta O Fionnagain in Trinity College Dublin, 2018
 MIT License
 
 Email: ofionnad@tcd.ie
+
 Github: https://github.com/Dualta93

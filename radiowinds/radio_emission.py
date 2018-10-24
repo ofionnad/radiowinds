@@ -67,7 +67,6 @@ def integrationConstant(rstar):
     int_c = rstar * rsun
     return int_c
 
-
 def prettyprint(x, baseunit):
     """
     Just a function to round the printed units to nice amounts
@@ -83,60 +82,58 @@ def prettyprint(x, baseunit):
     m = "{0:.2f}".format(float(m))
     return m + " " + prefix[int(e) // 3] + baseunit
 
-
-
-def testData(ndim, gridsize, n0, T0, gamma, ordered=True):
+def testData(points, gridsize, n0, T0, gamma, ordered=True):
     """
     Function to produce a grid of sample values of density and temperature.
     Either ordered which follows a n ~ R^{-3} profile, or not ordered which has a more randomised distribution.
 
-    :param ndim: Number of gridpoints in each dimension
+    :param points: Number of gridpoints in each dimension
     :param gridsize: The size of the grid radius in rstar
     :param n0: base density of the stellar wind
     :param T0: base temperature of the stellar wind
     :param gamma: polytopic index of the wind to derive temperature from density
     :param ordered: either cause density to fall off with R^{-3} or be more randomised with a R^{-3} component
-    :return: ds, n, T. ds is the spacing in the grid used for integration. n is the grid density (shape ndim^3). T is the grid temperature (shape ndim^3).
+    :return: ds, n, T. ds is the spacing in the grid used for integration. n is the grid density (shape points^3). T is the grid temperature (shape points^3).
     """
     if ordered==True:
-        o = np.array([int(ndim / 2), int(ndim / 2), int(ndim / 2)])
-        x = np.linspace(0, ndim - 1, ndim)
-        y = np.linspace(0, ndim - 1, ndim)
-        z = np.linspace(0, ndim - 1, ndim)
+        o = np.array([int(points / 2), int(points / 2), int(points / 2)])
+        x = np.linspace(0, points - 1, points)
+        y = np.linspace(0, points - 1, points)
+        z = np.linspace(0, points - 1, points)
         X, Y, Z = np.meshgrid(x, y, z)
-        ds = np.linspace(-gridsize,gridsize,ndim)
+        ds = np.linspace(-gridsize,gridsize,points)
         d = np.vstack((X.ravel(), Y.ravel(), Z.ravel())).T
         sph_dist = sp.distance.cdist(d, o.reshape(1, -1)).ravel()
-        sph_dist = sph_dist.reshape(ndim, ndim, ndim) /(ndim/2/gridsize)
-        sph_dist[int(ndim/2), int(ndim/2), int(ndim/2)] = 1e-40
+        sph_dist = sph_dist.reshape(points, points, points) /(points/2/gridsize)
+        sph_dist[int(points/2), int(points/2), int(points/2)] = 1e-40
         n = n0 * (sph_dist ** -3)
-        n[int(ndim / 2), int(ndim / 2), int(ndim / 2)] = 0
+        n[int(points / 2), int(points / 2), int(points / 2)] = 0
         # this is getting rid of the centre inf, doesn't matter as it is at centre and is removed anyway!
         T = T0 * (n / n0) ** gamma
         return ds, n, T
     else:
-        o = np.array([int(ndim / 2), int(ndim / 2), int(ndim / 2)])
-        x = np.linspace(0, ndim - 1, ndim)
-        y = np.linspace(0, ndim - 1, ndim)
-        z = np.linspace(0, ndim - 1, ndim)
+        o = np.array([int(points / 2), int(points / 2), int(points / 2)])
+        x = np.linspace(0, points - 1, points)
+        y = np.linspace(0, points - 1, points)
+        z = np.linspace(0, points - 1, points)
         X, Y, Z = np.meshgrid(x, y, z)
-        ds = np.linspace(-gridsize, gridsize, ndim)
+        ds = np.linspace(-gridsize, gridsize, points)
         d = np.vstack((X.ravel(), Y.ravel(), Z.ravel())).T
         sph_dist = sp.distance.cdist(d, o.reshape(1, -1)).ravel()
-        sph_dist = sph_dist.reshape(ndim, ndim, ndim) / (ndim / 2 / gridsize)
-        sph_dist[int(ndim/2), int(ndim/2), int(ndim/2)] = 1e-20
+        sph_dist = sph_dist.reshape(points, points, points) / (points / 2 / gridsize)
+        sph_dist[int(points/2), int(points/2), int(points/2)] = 1e-20
 
         #make random array of data
-        rand_n = n0*np.random.rand(ndim,ndim,ndim)
+        rand_n = n0*np.random.rand(points,points,points)
         n = rand_n * (sph_dist ** -3) #give it a resemblence of falling off with distance
         n[n>1e8] = n[n>1e8]+2e8  #cause some change to increase centre contrast in density!
-        n[int(ndim / 2), int(ndim / 2), int(ndim / 2)] = 0
+        n[int(points / 2), int(points / 2), int(points / 2)] = 0
         # this is getting rid of the centre inf, doesn't matter as it is at centre and is removed anyway!
 
         T = T0 * (n / n0) ** gamma
         return ds, n, T
 
-def readData(filename, skiprows, ndim):
+def readData(filename, skiprows, points):
     """
     This function expects an interpolated grid of data. Originally interpolated using the tecplot software.
     Not tested yet but I am sure VisIT interpolated produced a similar output and can also be used.
@@ -144,16 +141,15 @@ def readData(filename, skiprows, ndim):
 
     :param filename: Name of the data file to read from
     :param skiprows: Number of rows to skip (according to the pandas read_csv() function.
-    :param ndim: Number of gridpoints in each dimension
+    :param points: Number of gridpoints in each dimension
     :return: ds, n, T. Grid spacing, grid density and grid temperature.
     """
     df = pd.read_csv(filename, header=None, skiprows=skiprows, sep='\s+')
-    X = df[0].values.reshape((ndim, ndim, ndim))
+    X = df[0].values.reshape((points, points, points))
     ds = X[0, 0, :]
-    n_grid = (df[3].values.reshape((ndim, ndim, ndim))) / (1.673e-24 * 0.5)
-    T_grid = df[5].values.reshape((ndim, ndim, ndim))
+    n_grid = (df[3].values.reshape((points, points, points))) / (1.673e-24 * 0.5)
+    T_grid = df[5].values.reshape((points, points, points))
     return ds, n_grid, T_grid
-
 
 def rotateGrid(n, T, degrees, axis='z'):
     """
@@ -166,42 +162,44 @@ def rotateGrid(n, T, degrees, axis='z'):
     :return: n and T, rotated!
     """
 
-    print(axis, type(axis))
     # The z axis rotates the grid around the vertical axis (used for rotation modulation of a star for example)
     if axis == 'z':
         n_rot = interpol.rotate(n, degrees, axes=(1, 2), reshape=False)
         T_rot = interpol.rotate(T, degrees, axes=(1, 2), reshape=False)
+        return n_rot, T_rot
+
     # The x axis rotates the grid around the horizontal axis (used for tilting for stellar inclinations)
     if axis == 'x':
         n_rot = interpol.rotate(n, degrees, axes=(0, 2), reshape=False)
         T_rot = interpol.rotate(T, degrees, axes=(0, 2), reshape=False)
+        return n_rot, T_rot
+
     # The following is only included for completeness, you should never need to rotate around this axis!!!
     if axis == 'y':
         n_rot = interpol.rotate(n, degrees, axes=(0, 1), reshape=False)
         T_rot = interpol.rotate(T, degrees, axes=(0, 1), reshape=False)
+        return n_rot, T_rot
+
     else:
-        print(type(axis))
-        raise ValueError("axis is None. Need to assign value to axis")
+        print("axis is type: ", type(axis))
+        raise ValueError("Axis is the wrong type")
+        pass
 
-    # return rotated arrays
-    return n_rot, T_rot
-
-
-def emptyBack(n, gridsize, ndim):
+def emptyBack(n, gridsize, points):
     """
     Function that sets the density within and behind the star to zero (or very close to zero).
 
     :param n: grid densities
     :param gridsize: size of grid radius in rstar
-    :param ndim: number of gridpoints in each dimension
+    :param points: number of gridpoints in each dimension
     :return: n, the original grid of densities with the necessary densities removed
     """
     # First block of code removes the densities from the sphere in the centre
-    ndim = int(ndim)
-    c = ndim / 2  # origin of star in grid
+    points = int(points)
+    c = points / 2  # origin of star in grid
     o = np.array([c, c, c])  # turn into 3d  vector origin
-    rad = ndim / (gridsize * 2)  # radius of star in indices
-    x1 = np.linspace(0, ndim - 1, ndim)  # indices array, identical to y1 and z1
+    rad = points / (gridsize * 2)  # radius of star in indices
+    x1 = np.linspace(0, points - 1, points)  # indices array, identical to y1 and z1
     y1 = x1
     z1 = x1
     X, Y, Z = np.meshgrid(x1, y1, z1)  # make 3d meshgrid
@@ -220,13 +218,12 @@ def emptyBack(n, gridsize, ndim):
     p_circ = d2[circ_dist < rad]  # find the indices of points inside the circle
     p_circ = p_circ.astype(int, copy=False)
     for i in range(int(
-            ndim / 2)):  # iterate over the xz planes moving back from centre of the grid (ndim/2) to the back (ndim)
+            points / 2)):  # iterate over the xz planes moving back from centre of the grid (points/2) to the back (points)
         for j in p_circ:
             n[int(j[0]), int(i+c), int(j[1])] = 1e-40
             #n[int(j[0]), int(j[1]), int(i + c)] = 1e-40
 
     return n
-
 
 def absorptionBody(n, T, f):
     """
@@ -249,7 +246,6 @@ def absorptionBody(n, T, f):
     absorption_c[np.isinf(absorption_c)] = 1e-40
     return absorption_c, bb
 
-
 def get_gaunt(T, f):
     """
     Function that simply returns grid of values of gaunt factors from temperatures and frequencies
@@ -262,7 +258,6 @@ def get_gaunt(T, f):
 
     gaunt = 10.6 + (1.90 * np.log10(T)) - (1.26 * np.log10(f))
     return gaunt
-
 
 def opticalDepth(ds, ab, int_c):
     """
@@ -280,7 +275,6 @@ def opticalDepth(ds, ab, int_c):
 
     return tau
 
-
 def intensity(ab, bb, tau, ds, int_c):
     """
         Name : intensity()
@@ -291,7 +285,6 @@ def intensity(ab, bb, tau, ds, int_c):
     """
     I = intg.simps((bb * np.exp(-tau)) * ab, x=ds, axis=1) * int_c
     return I
-
 
 def flux_density(I, ds, d, int_c):
     """
@@ -304,14 +297,13 @@ def flux_density(I, ds, d, int_c):
     Sv = 1e23 * (int_c ** 2.0) * (intg.simps(intg.simps(I, x=ds), x=ds)) / d ** 2.0
     return Sv
 
-
-def get_Rv(contour, ndim, gridsize):
+def get_Rv(contour, points, gridsize):
     """
      Function to get the coordinates of a contour.
      Input:
 
         contour  : The contour object plotted on image
-        ndim     : number of grid points in image
+        points     : number of grid points in image
         gridsize : Size of grid in Rstar
 
      Returns:
@@ -323,30 +315,29 @@ def get_Rv(contour, ndim, gridsize):
     path = path[0]
     verts = path.vertices
     x, y = verts[:, 0], verts[:, 1]
-    x1, y1 = x - ndim / 2, y - ndim / 2
+    x1, y1 = x - points / 2, y - points / 2
     r = np.sqrt(x1 ** 2 + y1 ** 2)
-    Rv = gridsize * (max(r) / (ndim / 2.0))
+    Rv = gridsize * (max(r) / (points / 2.0))
     return Rv
 
-
-def double_plot(I, tau, f_i, ndim, gridsize):
+def double_plot(I, tau, f_i, points, gridsize):
     """
     Plot two images beside each other
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
     p = ax1.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-20, vmax=1e-12), cmap=cm.Greens)
     fig.suptitle(r'$\nu_{{\rm ob}}$ =  {0:.2f} Hz'.format(f_i), bbox=dict(fc="w", ec="C3", boxstyle="round"))
-    circ1 = plt.Circle((ndim / 2, ndim / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
+    circ1 = plt.Circle((points / 2, points / 2), (points / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax1.add_artist(circ1)
     div1 = make_axes_locatable(ax1)
     cax1 = div1.append_axes("right", size="8%", pad=0.1)
     cbar1 = plt.colorbar(p, cax=cax1)
     cbar1.set_label(r'I$_{\nu}$ (erg/s/cm$^2$/sr/Hz)', fontsize=16)
     p2 = ax2.imshow(tau[:, -1, :], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=0.399), cmap=cm.Oranges)
-    circ2 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
+    circ2 = plt.Circle(((points) / 2, (points) / 2), (points / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax2.add_artist(circ2)
     cset1 = ax2.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
-    Rv_PF = (get_Rv(cset1, ndim, gridsize))
+    Rv_PF = (get_Rv(cset1, points, gridsize))
     div2 = make_axes_locatable(ax2)
     cax2 = div2.append_axes("right", size="8%", pad=0.1)
     cbar2 = plt.colorbar(p2, cax=cax2)
@@ -374,8 +365,7 @@ def double_plot(I, tau, f_i, ndim, gridsize):
     #plt.close()
     return Rv_PF
 
-
-def spectrumCalculate(folder, freqs, ds, n_i, T_i, d, ndim, gridsize, int_c, plotting=False):
+def spectrumCalculate(folder, freqs, ds, n_i, T_i, d, points, gridsize, int_c, plotting=False):
     """
     Inputs : folder name, range of frequencies, position coordinate, density, temperature
 
@@ -392,18 +382,17 @@ def spectrumCalculate(folder, freqs, ds, n_i, T_i, d, ndim, gridsize, int_c, plo
         I = intensity(ab, bb, tau, ds, int_c)
         Sv = flux_density(I, ds, d, int_c)
         Svs.append(Sv)
-        Rv = double_plot(I, tau, j, ndim, gridsize)
+        Rv = double_plot(I, tau, j, points, gridsize)
         Rvs.append(Rv)
         if not plotting:
             pass
         else:
-            Rv, ax = single_plot(I, tau, j, ndim, gridsize)
+            Rv, ax = single_plot(I, tau, j, points, gridsize)
             plt.savefig('{0:}/img_{1:}'.format(folder, i), dpi=500)
             plt.close('all')
     return Svs, Rvs
 
-
-def radioEmission(ds, n_i, T_i, f, d, ndim, gridsize, int_c):
+def radioEmission(ds, n_i, T_i, f, d, points, gridsize, int_c):
     """
     Inputs : position coordinates, density (/cc), Temperature (K), distance to star (pc), number of points in each axes of the grid, grid size in rstar.
 
@@ -414,17 +403,16 @@ def radioEmission(ds, n_i, T_i, f, d, ndim, gridsize, int_c):
     print(tau[:,-1,:].max(), tau[:,-1,:].min())
     I = intensity(ab, bb, tau, ds, int_c)
     Sv = flux_density(I, ds, d, int_c)
-    Rv, ax = single_plot(I, tau, f, ndim, gridsize)
+    Rv, ax = single_plot(I, tau, f, points, gridsize)
     return I, Sv, Rv
 
-
-def single_plot(I, tau, f, ndim, gridsize):
+def single_plot(I, tau, f, points, gridsize):
     """
     Plot a single intensity image with the contours from the relevant optical depth image
     :param I: Intensities
     :param tau: 2d array of optical depths
     :param f: observing frequency
-    :param ndim: number of points in the grid in each spatial dimension
+    :param points: number of points in the grid in each spatial dimension
     :param gridsize: the size of the grid in rstar
 
     :return: Rv_PF - the radius of the optically thick regionax1 - the axes of the plot that is shown
@@ -435,9 +423,9 @@ def single_plot(I, tau, f, ndim, gridsize):
     p2 = axs.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)
     cset1 = plt.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
     frequency_text = int(f)
-    plt.text(int(ndim/10), int(ndim-(ndim/10)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
+    plt.text(int(points/10), int(points-(points/10)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
              bbox=dict(fc="w", ec="C3", boxstyle="round", alpha=0.8), fontsize=12)
-    circ3 = plt.Circle(((ndim) / 2, (ndim) / 2), (ndim / (2 * gridsize)), color='white', fill=True, alpha=0.4)
+    circ3 = plt.Circle(((points) / 2, (points) / 2), (points / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     axs.add_artist(circ3)
     divs = make_axes_locatable(axs)
     caxs = divs.append_axes("right", size="8%", pad=0.1)
@@ -451,14 +439,14 @@ def single_plot(I, tau, f, ndim, gridsize):
         print("\nNo contours! Optically Thin Wind")
         Rv_PF = None
     else:
-        Rv_PF = get_Rv(cset1, ndim, gridsize)
+        Rv_PF = get_Rv(cset1, points, gridsize)
 
-    axs.set_xticks(np.linspace(0, ndim, 5))
-    axs.set_yticks(np.linspace(0, ndim, 5))
+    axs.set_xticks(np.linspace(0, points, 5))
+    axs.set_yticks(np.linspace(0, points, 5))
     axs.set_xticklabels(['-'+str(int(gridsize)), '-'+str(int(gridsize/2)), '0', str(int(gridsize/2)), str(int(gridsize))], fontsize=16)
     axs.set_yticklabels(['-'+str(int(gridsize)), '-'+str(int(gridsize/2)), '0', str(int(gridsize/2)), str(int(gridsize))], fontsize=16)
-    #axs.set_xlim([int((ndim / 2) - (7.5 * (ndim / (2 * gridsize)))), int((ndim / 2) - (15 * (ndim / (2 * gridsize))))])
-    #axs.set_ylim([int((ndim / 2) - (7.5 * (ndim / (2 * gridsize)))), int((ndim / 2) - (15 * (ndim / (2 * gridsize))))])
+    #axs.set_xlim([int((points / 2) - (7.5 * (points / (2 * gridsize)))), int((points / 2) - (15 * (points / (2 * gridsize))))])
+    #axs.set_ylim([int((points / 2) - (7.5 * (points / (2 * gridsize)))), int((points / 2) - (15 * (points / (2 * gridsize))))])
     axs.set_xlabel(r'r (R$_{\star}$)', fontsize=20)
     axs.set_ylabel(r'r (R$_{\star}$)', fontsize=20)
     axs.grid(which='major', linestyle=':', alpha=0.8, color='white')

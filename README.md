@@ -74,7 +74,7 @@ n = df[1] #grid density
 T = df[2] #grid temperature
 ds = df[0] #grid spacing along integration line
 freq = 9e8 #observing frequency
-dist = 10 #distance in parsecs
+distance = 10 #distance in parsecs
 
 #remove density from behind star as this will not contribute to emisison
 n = re.emptyBack(n, gridsize, ndim)
@@ -82,7 +82,7 @@ n = re.emptyBack(n, gridsize, ndim)
 #find integration constant for grid of current size
 int_c = re.integrationConstant(rstar)
 
-I, sv, rv = re.radioEmission(ds, n, T, freq, dist, ndim, gridsize, int_c)
+I, sv, rv = re.radioEmission(ds, n, T, freq, distance, ndim, gridsize, int_c)
 ```
 This should output an image of the intensity (and assign this data to `I`) from the wind and assign the radio flux to `sv` and the radio photopshere size to `rv`.
 
@@ -94,7 +94,7 @@ This can be done by using the `spectrumCalculate()` function.
 Continuing on from the quick example above:
 
 ```python
-#set a range of frequencies to iterate over
+#set a range of frequencies to iterate over``
 freqs = np.logspace(8,11,50)
 output_dir = '/path/to/output' #where you want any output images to go
 plotting=False #set to True to save images of intensity at each frequency to output_dir
@@ -150,7 +150,7 @@ regions than would be visible had the 3d box been larger.
     Ensure that pytecplot is installed on your system.
 
 ### Author
-Written by Dualta O Fionnagain in Trinity College Dublin, 2018
+Written by D&uacute;alta &Oacute; Fionnag&aacute;in in Trinity College Dublin, 2018
 MIT License
 
 Email : ofionnad@tcd.ie

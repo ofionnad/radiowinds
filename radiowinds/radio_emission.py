@@ -15,13 +15,13 @@ import os
 
 rsun = 6.957e10  # cm
 
-def generateinterpolatedGrid(layfile, numpoints, coords):
+def generateinterpolatedGrid(layfile, points, coords):
     """
     Function to create and save an interpolated tecplot simulation grid for radio emission calculation
     This will only work with Tecplot 360 installed on your system.
 
     :param layfile: Tecplot .lay file to be interpolated
-    :param numpoints: Number of points in each spatial dimension
+    :param points: Number of points in each spatial dimension
     :param coords: Size of the grid in Rstar
     :return:
     """
@@ -43,12 +43,12 @@ def generateinterpolatedGrid(layfile, numpoints, coords):
       Z2 = {1:}
       XVar = 1
       YVar = 2
-      ZVar = 3'''.format(numpoints, coords))
+      ZVar = 3'''.format(points, coords))
 
     zone2 = cur_dataset.zone(1)  # name second zone for interpolation
     tp.data.operate.interpolate_linear(zone2, source_zones=zone1, variables=[3, 10, 22])
     # create second zone and fill with variables
-    tp.data.save_tecplot_ascii(cwd + '/interpol_grid_{0:}Rstar_{1:}points.dat'.format(coords, numpoints),
+    tp.data.save_tecplot_ascii(cwd + '/interpol_grid_{0:}Rstar_{1:}points.dat'.format(coords, points),
                                zones=[zone2],
                                variables=[0, 1, 2, 3, 10, 22],
                                include_text=False,
@@ -67,22 +67,7 @@ def integrationConstant(rstar):
     int_c = rstar * rsun
     return int_c
 
-def prettyprint(x, baseunit):
-    """
-    Just a function to round the printed units to nice amounts
-
-    :param x: Input value
-    :param baseunit: Units used
-    :return: rounded value with correct unit prefix
-    """
-    prefix = 'yzafpnµm kMGTPEZY'
-    shift = decimal.Decimal('1E24')
-    d = (decimal.Decimal(str(x)) * shift).normalize()
-    m, e = d.to_eng_string().split('E')
-    m = "{0:.2f}".format(float(m))
-    return m + " " + prefix[int(e) // 3] + baseunit
-
-def testData(points, gridsize, n0, T0, gamma, ordered=True):
+def testData(points, gridsize, n0, T0, gam, ordered=True):
     """
     Function to produce a grid of sample values of density and temperature.
     Either ordered which follows a n ~ R^{-3} profile, or not ordered which has a more randomised distribution.
@@ -91,7 +76,7 @@ def testData(points, gridsize, n0, T0, gamma, ordered=True):
     :param gridsize: The size of the grid radius in rstar
     :param n0: base density of the stellar wind
     :param T0: base temperature of the stellar wind
-    :param gamma: polytopic index of the wind to derive temperature from density
+    :param gam: polytopic index of the wind to derive temperature from density
     :param ordered: either cause density to fall off with R^{-3} or be more randomised with a R^{-3} component
     :return: ds, n, T. ds is the spacing in the grid used for integration. n is the grid density (shape points^3). T is the grid temperature (shape points^3).
     """
@@ -109,7 +94,7 @@ def testData(points, gridsize, n0, T0, gamma, ordered=True):
         n = n0 * (sph_dist ** -3)
         n[int(points / 2), int(points / 2), int(points / 2)] = 0
         # this is getting rid of the centre inf, doesn't matter as it is at centre and is removed anyway!
-        T = T0 * (n / n0) ** gamma
+        T = T0 * (n / n0) ** gam
         return ds, n, T
     else:
         o = np.array([int(points / 2), int(points / 2), int(points / 2)])
@@ -130,7 +115,7 @@ def testData(points, gridsize, n0, T0, gamma, ordered=True):
         n[int(points / 2), int(points / 2), int(points / 2)] = 0
         # this is getting rid of the centre inf, doesn't matter as it is at centre and is removed anyway!
 
-        T = T0 * (n / n0) ** gamma
+        T = T0 * (n / n0) ** gam
         return ds, n, T
 
 def readData(filename, skiprows, points):
@@ -453,3 +438,18 @@ def single_plot(I, tau, f, points, gridsize):
     plt.tight_layout()
 
     return Rv_PF, axs
+
+def prettyprint(x, baseunit):
+    """
+    Just a function to round the printed units to nice amounts
+
+    :param x: Input value
+    :param baseunit: Units used
+    :return: rounded value with correct unit prefix
+    """
+    prefix = 'yzafpnµm kMGTPEZY'
+    shift = decimal.Decimal('1E24')
+    d = (decimal.Decimal(str(x)) * shift).normalize()
+    m, e = d.to_eng_string().split('E')
+    m = "{0:.2f}".format(float(m))
+    return m + " " + prefix[int(e) // 3] + baseunit

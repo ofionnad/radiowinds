@@ -1,5 +1,7 @@
 # Radio Emission from Stellar Winds
 
+[![DOI](https://zenodo.org/badge/150600162.svg)](https://zenodo.org/badge/latestdoi/150600162)
+
 This is a Python code to calculate the radio emission produced by the winds around stars. 
 The code calculates thermal bremsstrahlung that is emitted from the wind, which depends directly on the density and temperature of the stellar wind plasma. 
 The program takes input data in the form of an interpolated 3d grid of points (of the stellar wind) containing position, temperature and density data. 

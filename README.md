@@ -7,7 +7,9 @@ The code calculates thermal bremsstrahlung that is emitted from the wind, which 
 The program takes input data in the form of an interpolated 3d grid of points (of the stellar wind) containing position, temperature and density data. 
 From this it calculates the thermal free-free emission expected from the wind at a range of user-defined frequencies. 
 
-This code is used in a paper currently submitted to Monthly Notices of the Royal Astronomical Society. 
+This code is used in a paper accepted to Monthly Notices of the Royal Astronomical Society. Available at ArXiv: https://arxiv.org/pdf/1811.05356.pdf 
+
+Please cite the above work if using this code.
 
 
 ## Installation

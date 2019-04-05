@@ -31,7 +31,7 @@ def generateinterpolatedGrid(layfile, points, coords):
     cur_dataset = frame1.dataset
     zone1 = cur_dataset.zone(0)  # zone1 is what tecplot uses for plotting in the layfile
 
-    tp.macro.execute_command('''$!CreateRectangularZone 
+    tp.macro.execute_command('''$!CreateRectangularZone
       IMax = {0:}
       JMax = {0:}
       KMax = {0:}
@@ -225,7 +225,7 @@ def absorptionBody(n, T, f):
     kb = 1.38e-16
     h = 6.62607e-27
     c = 2.998e10
-    absorption_c = 3.692e8 * (1.0 - np.exp(-(h * f) / (kb * T))) * ((n / 4.) ** 2) * (T ** -0.5) * (f ** -3.0) * gaunt
+    absorption_c = 3.692e8 * (1.0 - np.exp(-(h * f) / (kb * T))) * ((n**2 / 4.)) * (T ** -0.5) * (f ** -3.0) * gaunt
     bb = ((2.0 * h * (f ** 3.0)) / (c ** 2.0)) * (1.0 / (np.exp((h * f) / (kb * T)) - 1.0))
     absorption_c[np.isnan(absorption_c)] = 1e-40
     absorption_c[np.isinf(absorption_c)] = 1e-40

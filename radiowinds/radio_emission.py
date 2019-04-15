@@ -321,7 +321,7 @@ def double_plot(I, tau, f_i, points, gridsize):
     p2 = ax2.imshow(tau[:, -1, :], interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-8, vmax=0.399), cmap=cm.Oranges)
     circ2 = plt.Circle(((points) / 2, (points) / 2), (points / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     ax2.add_artist(circ2)
-    cset1 = ax2.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
+    cset1 = ax2.contour(tau[:, -1, :], [0.399], colors='k', origin='lower', linestyles='dashed')
     Rv_PF = (get_Rv(cset1, points, gridsize))
     div2 = make_axes_locatable(ax2)
     cax2 = div2.append_axes("right", size="8%", pad=0.1)
@@ -406,7 +406,7 @@ def single_plot(I, tau, f, points, gridsize):
 
     fig, axs = plt.subplots(1, 1, figsize=(7.3, 6))
     p2 = axs.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)
-    cset1 = plt.contour(tau[:, -1, :], 0.399, colors='k', origin='lower', linestyles='dashed')
+    cset1 = plt.contour(tau[:, -1, :], []0.399], colors='k', origin='lower', linestyles='dashed')
     frequency_text = int(f)
     plt.text(int(points/10), int(points-(points/10)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
              bbox=dict(fc="w", ec="C3", boxstyle="round", alpha=0.8), fontsize=12)

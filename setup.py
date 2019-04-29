@@ -5,7 +5,7 @@ with open("READMEpy.md", "r") as fh:
 
 setuptools.setup(
     name="radiowinds",
-    version="1.0.0",
+    version="1.0.3",
     author="Dualta O Fionnagain",
     author_email="ofionnad@tcd.ie",
     description="A package to calculate the thermal free-free emission from stellar winds",
@@ -13,6 +13,14 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Dualta93/radiowinds",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'moviepy',
+        'numpy',
+        'pandas',
+        'scipy',
+        'pytecplot',
+        'natsort',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

@@ -7,4 +7,5 @@ radiowinds/test.py
 radiowinds.egg-info/PKG-INFO
 radiowinds.egg-info/SOURCES.txt
 radiowinds.egg-info/dependency_links.txt
+radiowinds.egg-info/requires.txt
 radiowinds.egg-info/top_level.txt

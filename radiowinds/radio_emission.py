@@ -406,7 +406,7 @@ def single_plot(I, tau, f, points, gridsize):
 
     fig, axs = plt.subplots(1, 1, figsize=(7.3, 6))
     p2 = axs.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)
-    cset1 = plt.contour(tau[:, -1, :], []0.399], colors='k', origin='lower', linestyles='dashed')
+    cset1 = plt.contour(tau[:, -1, :], [0.399], colors='k', origin='lower', linestyles='dashed')
     frequency_text = int(f)
     plt.text(int(points/10), int(points-(points/10)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
              bbox=dict(fc="w", ec="C3", boxstyle="round", alpha=0.8), fontsize=12)

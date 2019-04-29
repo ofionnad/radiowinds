@@ -1,0 +1,10 @@
+README.md
+setup.py
+radiowinds/__init__.py
+radiowinds/make_animation.py
+radiowinds/radio_emission.py
+radiowinds/test.py
+radiowinds.egg-info/PKG-INFO
+radiowinds.egg-info/SOURCES.txt
+radiowinds.egg-info/dependency_links.txt
+radiowinds.egg-info/top_level.txt

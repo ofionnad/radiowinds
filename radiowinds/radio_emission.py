@@ -15,7 +15,7 @@ import os
 
 rsun = 6.957e10  # cm
 
-def generateinterpolatedGrid(layfile, points, coords):
+def generateinterpolatedGrid(layfile, points, coords, variables):
     """
     Function to create and save an interpolated tecplot simulation grid for radio emission calculation
     This will only work with Tecplot 360 installed on your system.
@@ -23,6 +23,7 @@ def generateinterpolatedGrid(layfile, points, coords):
     :param layfile: Tecplot .lay file to be interpolated
     :param points: Number of points in each spatial dimension
     :param coords: Size of the grid in Rstar
+    :param variables: The number tecplot assigned to each variable for interpolation and output
     :return:
     """
     cwd = os.getcwd()
@@ -46,11 +47,11 @@ def generateinterpolatedGrid(layfile, points, coords):
       ZVar = 3'''.format(points, coords))
 
     zone2 = cur_dataset.zone(1)  # name second zone for interpolation
-    tp.data.operate.interpolate_linear(zone2, source_zones=zone1, variables=[3, 10, 22])
+    tp.data.operate.interpolate_linear(zone2, source_zones=zone1, variables=variables)
     # create second zone and fill with variables
     tp.data.save_tecplot_ascii(cwd + '/interpol_grid_{0:}Rstar_{1:}points.dat'.format(coords, points),
                                zones=[zone2],
-                               variables=[0, 1, 2, 3, 10, 22],
+                               variables=[0, 1, 2] + variables,
                                include_text=False,
                                precision=9,
                                include_geom=False,
@@ -133,7 +134,7 @@ def readData(filename, skiprows, points):
     X = df[0].values.reshape((points, points, points))
     ds = X[0, 0, :]
     n_grid = (df[3].values.reshape((points, points, points))) / (1.673e-24 * 0.5)
-    T_grid = df[5].values.reshape((points, points, points))
+    T_grid = df[4].values.reshape((points, points, points))
     return ds, n_grid, T_grid
 
 def rotateGrid(n, T, degrees, axis='z'):
@@ -356,7 +357,6 @@ def spectrumCalculate(folder, freqs, ds, n_i, T_i, d, points, gridsize, int_c, p
 
     Function : Calculates flux density (Sv) and radius of emission (Rv) for a range of frequencies
     """
-    print(d)
     Svs = []
     Rvs = []
     taus = []
@@ -385,7 +385,6 @@ def radioEmission(ds, n_i, T_i, f, d, points, gridsize, int_c):
     """
     ab, bb = absorptionBody(n_i, T_i, f)
     tau = opticalDepth(ds, ab, int_c)
-    print(tau[:,-1,:].max(), tau[:,-1,:].min())
     I = intensity(ab, bb, tau, ds, int_c)
     Sv = flux_density(I, ds, d, int_c)
     Rv, ax = single_plot(I, tau, f, points, gridsize)
@@ -405,11 +404,10 @@ def single_plot(I, tau, f, points, gridsize):
     """
 
     fig, axs = plt.subplots(1, 1, figsize=(7.3, 6))
-    p2 = axs.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-12), cmap=cm.Greens)
+    p2 = axs.imshow(I, interpolation='bilinear', origin='lower', norm=LogNorm(vmin=1e-17, vmax=1e-10), cmap=cm.Greens)
     cset1 = plt.contour(tau[:, -1, :], [0.399], colors='k', origin='lower', linestyles='dashed')
     frequency_text = int(f)
-    plt.text(int(points/10), int(points-(points/10)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')),
-             bbox=dict(fc="w", ec="C3", boxstyle="round", alpha=0.8), fontsize=12)
+    plt.text(int(points/20), int(points-(points/15)), r'$\nu_{{\rm ob}}$ =  {}'.format(prettyprint(frequency_text, 'Hz')), bbox=dict(fc="w", ec="C3", boxstyle="round", alpha=0.8), fontsize=12)
     circ3 = plt.Circle(((points) / 2, (points) / 2), (points / (2 * gridsize)), color='white', fill=True, alpha=0.4)
     axs.add_artist(circ3)
     divs = make_axes_locatable(axs)

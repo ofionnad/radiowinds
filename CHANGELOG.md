@@ -1,3 +1,20 @@
+### v1.0.1
+28.04.2019
+
+DOF
+
+Changed the generateinterpolatedGrid() to include the variable number from tecplot
+
+---------------------------------------
+
+### v1.0.0
+26.04.2019
+
+DOF
+
+Fixed the density bug in absorptionBody() function 
+There was a factor of 4 difference in the calculation that was incorrect.
+
 ---------------------------------------
 
 ### v0.0.2 

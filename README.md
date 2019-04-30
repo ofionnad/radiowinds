@@ -140,18 +140,21 @@ regions than would be visible had the 3d box been larger.
     The pandas module is used to load data. 
     
     For the function to work properly, the datafile must be in column format with whitespace as the data seperator.
-    The order of the data should be [X, Y, Z, density, pressure, temeprature]. (Pressure is actually not required as an input so the 5th column could be a dummy parameter.)
+    The order of the data should be [X, Y, Z, density, temperature].
     
 * ##### generateinterpolatedGrid()
     If Tecplot is installed on the system then this function should work to interpolated a 3d grid of data onto a regular 3d grid.
     It uses some function from the pytecplot module as well as some macro functions avaiable from Tecplot.
     As inputs it requires the .lay datafile, the number of points you want in your interpolated grid and the size of the grid in R<sub>&#8902;</sub>.
+    The final input is the variable number of density and temperature as a list. e.g. [3, 20]
     ```python
-    generateinterpolatedGrid('/path/to/tecplotfile.lay', 200, 10)
+    generateinterpolatedGrid('/path/to/tecplotfile.lay', 200, 10, [3, 20])
     ```
     Would create a grid of 200 x 200 x 200 points ranging from -10 to 10 R<sub>&#8902;</sub> in each direction (x,y,z).
     
     Ensure that pytecplot is installed on your system.
+
+    In future might adapt this to work for the VisIT output.
 
 ### Author
 Written by D&uacute;alta &Oacute; Fionnag&aacute;in in Trinity College Dublin, 2018

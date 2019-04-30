@@ -1,3 +1,12 @@
+### v1.1.0
+29.04.2019
+
+DOF
+
+Update for new release with all previous changes
+
+----------------------------------
+
 ### v1.0.1
 28.04.2019
 

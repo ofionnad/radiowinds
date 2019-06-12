@@ -222,7 +222,7 @@ def absorptionBody(n, T, f):
 
     :return: alpha_v, B(v,T) : absorption coefficients and the blackbody of each cell
     """
-    gaunt = 10.6 + (1.90 * np.log10(T)) - (1.26 * np.log10(f))
+    gaunt = get_gaunt(T, f)
     kb = 1.38e-16
     h = 6.62607e-27
     c = 2.998e10
@@ -243,6 +243,7 @@ def get_gaunt(T, f):
     """
 
     gaunt = 10.6 + (1.90 * np.log10(T)) - (1.26 * np.log10(f))
+    gaunt[gaunt<0] = 1e-40
     return gaunt
 
 def opticalDepth(ds, ab, int_c):

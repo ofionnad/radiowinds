@@ -243,7 +243,15 @@ def get_gaunt(T, f):
     """
 
     gaunt = 10.6 + (1.90 * np.log10(T)) - (1.26 * np.log10(f))
-    gaunt[gaunt<0] = 1e-40
+
+    """
+    This assumption for gaunt factor is only applicable to temperatures > 10,000 K, according to Saha equation
+    I think including the R.M.S of the ionisation fraction as a function of T would fix this
+    Aline says this is a quicker fix, although less exact
+    Most emission should occur in the more ionised regions anyway!
+    """
+    gaunt[T < 1.0e4] = 1e-40
+
     return gaunt
 
 def opticalDepth(ds, ab, int_c):

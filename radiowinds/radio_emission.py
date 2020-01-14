@@ -250,7 +250,12 @@ def get_gaunt(T, f):
     Aline says this is a quicker fix, although less exact
     Most emission should occur in the more ionised regions anyway!
     """
-    gaunt[T < 1.0e4] = 1e-40
+    if np.any(T < 1.0e4):
+        print("\nCold wind assumption!!...\n")
+        print("\n... Assuming the gaunt factor goes to 1 in the case of T < 10,000 K\n")
+        print("Setting gaunt = 1 if T < 1.0e4\n")
+
+    gaunt[T < 1.0e4] = 1.0
 
     return gaunt
 

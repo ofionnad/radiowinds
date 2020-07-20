@@ -1,3 +1,10 @@
+### v1.2.0
+20.07.2020
+
+DOF
+
+Update the package, fixed some installation bugs etc.
+
 ### v1.1.0
 29.04.2019
 

@@ -1,11 +1,11 @@
 import setuptools
 
-with open("READMEpy.md", "r") as fh:
+with open("READMEpypi.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="radiowinds",
-    version="1.1.0",
+    version="1.2",
     author="Dualta O Fionnagain",
     author_email="ofionnad@tcd.ie",
     description="A package to calculate the thermal free-free emission from stellar winds",
